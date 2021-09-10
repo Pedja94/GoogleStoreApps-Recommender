@@ -40,8 +40,12 @@ def main():
     recommed_apps = input('Number of similar apps to display: ')
 
     app_name = input('Find similar apps for: ')
-    print()
+   
     while (app_name != 'exit' and app_name != 'Exit'):
+        id = raw_data_df.index[raw_data_df['App'] == app_name].tolist()
+        print(raw_data_df.loc[id])
+        print()
+
         similar_apps = getRecommendedApps(app_name, data_df, app_names_df, model, int(recommed_apps))
 
         print('Similar apps for app ', app_name, ' are:')
@@ -49,11 +53,12 @@ def main():
         print(similar_apps)
         print()
 
-        for _, row in similar_apps.iterrows():
-            name = row['App']
+        if (len(similar_apps) != 0):
+            for _, row in similar_apps.iterrows():
+                name = row['App']
 
-            id = raw_data_df.index[raw_data_df['App'] == name].tolist()
-            print(raw_data_df.loc[id])
+                id = raw_data_df.index[raw_data_df['App'] == name].tolist()
+                print(raw_data_df.loc[id])
 
         print()
 
