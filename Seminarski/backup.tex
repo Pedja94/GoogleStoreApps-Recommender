@@ -1,0 +1,522 @@
+\documentclass[a4paper,12pt,titlepage]{article}
+\usepackage{amsmath}
+\usepackage[serbian]{babel}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{currvita}
+\usepackage{hyperref} 
+\usepackage{float}
+\usepackage[letterspace=125]{microtype}
+\usepackage{tabu}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{chngcntr}
+\usepackage{listings}
+
+\newtheorem{definicija}{Definicija}[section]
+\newtheorem{teorema}{Teorema}[section]
+\renewcommand{\contentsname}{Sadr\v zaj}
+\renewcommand{\refname}{Literatura}
+\renewcommand{\mod}[1]{$mod$ ${#1}$}
+\newcommand{\sectionbreak}{\clearpage}
+
+%\title{\Huge {\textbf{Obrada slike korišćenjem Guided filtra}}}
+%\author{\textbf{Autor:} Predrag Nikolić \\ \textbf{Mentor:} Dejan Rančić}
+%\date{\today}
+
+\begin{document}
+\begin{titlepage}
+    \begin{center}
+    
+        \includegraphics[width=2.6cm]{img/uni.png}%
+        \begin{minipage}[b]{0.7\textwidth}
+            \centering
+            \Large
+            \textbf{UNIVERZITET U NIŠU\\ ELEKTRONSKI FAKULTET\\}       
+            \large
+            \textbf{Katedra za računarstvo}
+        \end{minipage}%
+        \includegraphics[width=2.6cm]{img/elfak.png}
+        
+              
+      
+        \vspace{5cm}
+        \Large
+        \textbf{Sistem za preporuku android aplikacije}
+        
+        \vspace{0.6cm}
+        \normalsize
+        \textls{-SEMINARSKI RAD-}     
+    \end{center}
+    
+    \vspace{1cm}
+   
+    %\textbf{Zadatak:}
+    
+   % \vspace{0.2cm}
+    
+    %\setlength{\leftskip}{0.6cm}
+   % \noindent
+   % Istražiti tehnike filtriranja slike. Implementacija vođenog filtera i analiza njegovih osobina u različitim primenama.
+    
+    \vspace{10cm}
+    
+    \noindent \begin{tabu} to \textwidth{@{}X[l] X[r]@{}}
+        \textbf{Mentor:} Doc. dr Miloš Bogdanović &
+        \textbf{Student:} Predrag Nikolić 653
+    \end{tabu}
+    
+    \vspace{1cm}
+   
+  % \noindent
+   % Komisija:
+    
+   % \vspace{0.1cm}
+    
+   % \noindent
+    %\begin{tabu} to \textwidth{@{}X[l] X[r]@{}}  
+   %      \begin{tabular}{@{}ll}
+     %       1. & \underline{\hspace{6.5cm}}\\
+      %      2. & \underline{\hspace{6.5cm}}\\
+     %       3. & \underline{\hspace{6.5cm}}
+     %   \end{tabular}  
+        
+   % &
+   
+      %  \begin{tabular}{ll@{}}
+       %     Datum prijave: & \underline{\hspace{3cm}}\\
+    %        Datum predaje: & \underline{\hspace{3cm}}\\
+     %       Datum odbrane: & \underline{\hspace{3cm}}
+    %    \end{tabular}
+  
+  %  \end{tabu}
+    
+   % \vspace{4cm}
+    
+     \begin{center}
+        Niš, \the\year.
+    \end{center}
+\end{titlepage}
+
+\tableofcontents
+
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{15pt}%
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+
+\thispagestyle{empty}
+\newpage
+
+\pagenumbering{arabic} 
+
+\section{Uvod}%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Milioni korisnika svakodnevno koriste \emph{Google Play} prodavnicu da bi instalirali android aplikacije na svojim uređajima. Zbog toga što korisnici obično ne znaju šta konkretno hoće da instaliraju, oni provode vreme u traženju novih aplikacije, koje će možda da im se svide. Kako na \emph{Google Play} servisu postoje milioni aplikacija, pretraživanje aplikacija da bi se našla odgovarajuća može da bude iscrpljujuća za korisnike. Da bi se korisnicima ovaj postupak olakšao \emph{Google Play} prodavnica može da da preporuku, baziranu na tome šta je korisnik već instalirao, kako bi se korisniku pružio manji podskup aplikacija koje treba da pregleda i kako bi mu se dala ideja da instalira aplikaciju, za koju ne zna.
+
+Ovim problemom se bave sistemi za preporuku. Sistemi za preporuku predstavljaju skup tehnika i metoda za predikciju preference koju bi korisnik imao prema nekoj stavci. Preferenca korisnika se određuje raznim metodama koje su bazirane na podacima o tim stavkama i podacima o tome koje je stavke korisnik preferirao u prošlosti ili preferira trenutno. 
+
+Ovaj projekat se bavi sistemom preporuke za android aplikacije sa \emph{Google Play} prodavnice. Sistem preporuke je baziran na podacima o aplikacijama sa \emph{Google Play} prodavnice, koji su dati u okviru skupa podataka. U ovom radu je predstavljen postupak analize i pripreme podataka. Sam sistem preporuke je implementiran kao aplikacija koja na osnovu skupa podataka i metoda određivanja sličnosti vraća preporuke android aplikacija.
+
+U sledećem poglavlju je dat teoretski osvrt na sisteme za preporuku. U trećem poglavlju su dati detalji implementacije kao i postupak analize i obrade skupa podataka, a četvrto poglavlje se bavi analizom rezultata.
+
+
+
+\section{Sistemi za preporuke}%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Sistemi za preporuku su podskup sistema za filtriranje informacija koji pokušavaju da predvide rejting ili preferencu koju korisnik ima prema nekoj aplikaciji \cite{RecommendSystem}. Sistemi za preporuku se koriste u raznim oblastima, a oni generišu preporuke za razne servise kao što su muzički i video servisi, veb prodavnice, socijalne mreže itd. Zadatak sistema za preporuku je da da predlog korisniku, kako bi olakšao njegovo korišćenje nekog servisa. Na primer, na osnovu toga šta neki korisnik koristi od mobilnih aplikacija, sistem za preporuku može da preporuči korisniku niz aplikacija koje do sada nije koristio, a koje mogu da mu budu od koristi. 
+
+Sistemi za preporuku mogu da koriste razne tehnike i metode da bi pronašli preporuku. Tehnike i metode za pronalaženje preporuka su bazirane na podacima o korisnicima nekog sistema. Sistemi za preporuku koriste takve podatke da bi pronašli neku korelaciju između onoga što korisnik traži i onoga što se nalazi u tom sistemu.
+
+Postoje dva glavna pristupa koji se koriste prilikom implementiranja sistema za preporuku, koji mogu da se koriste nezavisno ili zajedno da bi se odredila preporuka. Jedan je filtriranje bazirano na sadržaju  (eng. \emph{content-based filtering}), drugi je filtriranje bazirano na interakciji drugih korisnika (eng. \emph{collaborative filtering}). 
+
+
+\subsection{Filtriranje bazirano na sadržaju}
+
+Filtriranje bazirano na sadržaju (eng. \emph{content-based filtering}) je jedan od osnovnih pristupa za implementaciju sistema za preporuku. Ove metode i tehnike su bazirane na informacijama vezanim za stavku koju korisnik traži i na informacijama o tome koje preference korisnik ima. Ovaj pristup je koristan kada imamo podatke o stavkama, a ne o korisniku. Obzirom na prirodu podataka koje imamo dostupne za android aplikacije, u ovom projektu je korišćen ovaj pristup za implementaciju sistema za preporuku android aplikacija. 
+
+Sistemi bazirani na ovom pristupu tretiraju preporuku kao klasifikaciju specifičnu za korisnika, koja klasifikuje šta je korisniku potrebno ili ne, bazirano na podacima o stavkama. Ovi sistemi pokušavaju da preporuče stavke koje su slične kao stavke koje je korisnik preferirao u prošlosti ili trenutno. Da bi se odredilo šta korisnik preferira, koriste se informacije o tome koje je stavke korisnik preferirao u prošlosti, ali se koriste i podaci o interakciji korisnika sa sistemom za preporuku. Na osnovu ovih stavki se kasnije kreira preporuka. 
+
+Da bi podaci o stavkama mogli da se koriste u procesu klasifikacije potrebno je da se oni pretvore u oblik koji odgovara takvim tehnikama i metodama. Podaci koji opisuju stavku se, na osnovu analize podataka, pretvaraju u vektore koji određenim vrednostima opisuju stavku. Tako vektorizovani podaci se kasnije koriste za određivanje preporuke. Tehnike mašinskog učenja koje mogu da se koriste za generisanje preporuke su Bajesovi klasifikatori, analize klastera, stabla odluke i neuronske mreže.
+
+Glavni nedostatak ovog pristupa se ogleda u tome što je sistem za preporuku limitiran da daje preporuke o stavkama koje su istog tipa kao stavke koje korisnik već koristi. Ovi sistemi su limitirani na izvor sadržaja, koji korisnik pretražuje i ne mogu da daju preporuku za  stavke koje potiču iz drugačijeg izvora. Da bi se ovo prevazišlo u realnim primenama se koriste hibridni sistemi, koji kombinuju ovaj pristup sa drugim tehnikama i metodama.
+
+
+\subsection{Filtriranje bazirano na interakciji drugih korisnika}
+
+Filtriranje bazirano na sadržaju interakcije korisnika (eng. \emph{collaborative filtering}) je pristup za kreiranje sistema za preporuku, koji je baziran na navikama drugih korisnika. Ovaj pristup je baziran na tome da ako dva korisnika preferiraju sličan skup stavki, onda preporka može da bude neka stvaka sličnog korisnika koju korisnik koji trenutno pretražuje nije preferirao do sada. Sistem kreira preporuke na osnovu preferenca korisnika prema stavkama, tako što lokalizuje i povezuje korisnike, koji imaju slične preference. Ove metode se dele na metode bazirane na memoriji i metode bazirane na modelu. Glavna prednost ovakvog pristupa se ogleda u tome što sistem može da kreira preporuku bez eksplicitnih podataka o stavkama koje preporučuje. 
+
+Da bi se pronašli slični korisnici, potrebno je da se kreiraju profili korisnika koji se kasnije vektorizuju, da bi se nad vektorima kasnije primenjivale razne metode za određivanje sličnosti. Za određivanje sličnosti dva korisnika mogu da se koriste različite mere i koeficijenti, kao što je Pirsonova korelacija, a mogu da se koriste i metode mašinskog učenja kao što je \emph{k-nearest neighbor}.
+
+Jedan od nedostataka ovog pristupa je pronalaženje sličnog korisnika za novog korisnika, jer novi korisnik nema informacije o korišćenim aplikacijama. Takođe problem može da se javi, ako sistem sadrži veliki broj stavki, jer korisnici obično koriste mali podskup stavki, koji može da bude dosta različit za korisnike. Veliki broj stavki može da utiče i na skalabilnost sistema, jer je u tom slučaju potrebno više vremena i resurasa za izvršavanje metoda za pronalaženje sličnih korisnika.
+
+
+\subsection{Hibridni pristup}
+
+Obzirom da prethodno pomenuti pristupi imaju svoje nedostatke, prilikom implementacije sistema za preporuku se obično koristi kombinovani pristup, koji uključuje tehnike i metode oba pristupa. Pored mogu da se koriste i druge tehnike i metode, da bi se upotpunili nedostaci oba pristupa. Hibridni pristup može da se realizuje na nekoliko načina:
+
+\begin{itemize}
+\item Kombinovanjem predikcija koje su dobijene primenom oba pristupa zasebno.
+\item Dodavanjem mogućnosti jednog pristupa u drugi.
+\item Kombinovanjem oba pristupa u jedan zajednički model.
+\end{itemize}
+
+
+\subsection{Metoda za određivanje preporuke}
+
+Kao što smo videli u prethodnim odeljcima, pristup koji se koristi za kreiranje sistema za preporuku zavisi od toga koji su podaci dostupni, kao i od toga kako i na koji način želimo da tretiramo podatke. Ono što je glavno za dva osnovna pristupa je to da traže neku sličnost u podacima. Sličnost u podacima može da se nađe preko raznih mera sličnosti, ali može da se odredi preko raznih relacija među podacima, koje mogu da se dobiju korišćenjem tehnika i metoda mašinskog učenja. U ovom projektu su za pronalaženje preporuka iskorišćena metoda \emph{k-nearest neighbor} i kosinusna sličnost, pa će oni biti detaljnije objašnjeni u nastavku.
+
+Metoda k najsličnijih ''komšija'' (eng. \emph{k-nearest neighbor}) je metoda mašinskog učenja, koja pretpostavlja da se slične stvari mogu naći ''blizu'' jedna drugoj. Koliko su dve stvari ''blizu'' može da se odredi na osnovu neke mere distance ili sličnosti, kao na primer euklidska distanca ili kosinusna sličnost. Ova metoda pronalazi $k$ sličnih podataka u odnosu na podatak za koji tražimo slične podatke. Podaci se pretražuju u skupu svih podataka. U ovom projektu je za kriterijum pronlaženja $k$ najsličnijih podataka iskorišćena euklidska distanca. Metoda k najsličnijih ''komšija'' pronalazi $k$ podataka koji imaju najmanju Euklidsku distancu u odnosu na zadati primer podatka. Euklidska distanca je mera distance između dve tačke odnosno dva vektora u prostoru koja se izračunava kao norma razlike ta dva vektora:
+
+\begin{equation}
+d(\vec{p}, \vec{q}) = |\vec{p} - \vec{q}|,
+\end{equation}
+
+Nakon pronalaženja k najsličnijih podataka korišćenjem metode \emph{k-nearest neighbor}, ti podaci se sortiraju u odnosu na meru kosinusne sličnosti sa podatkom za koji tražimo slične podatke. Oni se sortiraju u opadajućem redosledu u odnosu na vrednost kosinusne sličnosti (maksimalna vrednost je 1).Kosinusna sličnost je mera sličnosti između dva vektora koja se izračunava kao količnik skalarnog proizvoda i proizvoda dužina vektora:
+
+\begin{equation}
+cos(\theta) = {\vec{p} \cdot \vec{q} \over ||\vec{p}|| * ||\vec{q}||},
+\end{equation}
+
+
+
+\section{Implementacija}
+
+Za implementaciju je korišćen programski jezik \emph{Python} i biblioteka \emph{ScikitLearn}, kao i neke druge standardne biblioteke koje se koriste u oblasti mašinskog učenja. Skup podataka na osnovu koga je napravljen ovaj sistem za preporuke sadrži informacije o aplikacijama sa \emph{Google Play} prodavnice. Ovo je javno dostupni skup podataka koji se može naći na sajtu \emph{Kaggle} (\href{https://www.kaggle.com/lava18/google-play-store-apps}{https://www.kaggle.com/lava18/google-play-store-apps}).
+
+Implementacija je bazirana na pristupu koji je obrađen u radu \cite{RecommendSystemPaper}.Implementacija je podeljena u dva dela. Prvi deo obuhvata pripremu i analizu podataka koja je prikazana u okviru \emph{Jupyter notebook}-a. Kao rezultat ovog dela koda dobijaju se obrađeni podaci koji se kasnije koriste za obučavanje modela. Drugi deo implementacije predstavlja aplikaciju koja za datu aplikaciju vraća preporuke.
+
+\subsection{Korišćeni alati}
+
+Aplikacija je implementirana u programskom jeziku \emph{Python}, verziji 3. Biblioteke i alati koji su korišćeni u kodu su:
+
+\begin{itemize}
+\item \emph{NumPy} \cite{NumPy}
+\item \emph{Pandas} \cite{Pandas}
+\item \emph{Jupyter notebook} \cite{Jupyter}
+\item \emph{Matplotlib} \cite{Matplotlib}
+\item \emph{Seaborn} \cite{Seaborn}
+\item \emph{SciKit learn} \cite{Scikit}
+\end{itemize}
+
+\emph{Numpy} je \emph{Python} biblioteka koja pruža implementaciju multidimenzionalnog vektora kao objekta. Sam \emph{Python} ne pruža mogućnost za manipulaciju sa listama, pa se \emph{numpy} uglavnom uvek koristi u okviru ovakvih aplikacija. Osnovni objekat je \emph{ndarray}, koji pruža napredne funkcije nad nizom podataka. Takođe ova biblioteka pruža mogućnost izvršavanja operacija nad dva ili više \emph{ndarray} objekata. Ova biblioteka je napisana u programskom jeziku \emph{C}, tako da pruža visoke performanse prilikom obavljanja operacija.
+
+Biblioteka \emph{pandas} pruža objekte i strukture dizajnirane za rad sa označenim i relacionim podacima. Kao takva se uglavnom koristi u projektima koji uključuju analizu, obradu i pripremu podataka. Ova biblioteka je jedna od najkorisnijih u oblasti mašinskog učenja. Dva objekta koja implementira ova biblioteka su \emph{Series} i \emph{DataFrame}. \emph{DataFrame} je objekat koji pruža funkcionalnosti manipulacije i obrade tabelarnih podataka i učitavanja podataka iz raznih formata fajlova i baza podataka. Ova biblioteka je napisana u \emph{Python}-u i koristi objekat \emph{ndarray}, tako da je saglasna sa bibliotekom \emph{Numpy}. Zbog toga što je implementirana u \emph{Python}-u, nema visoke performanse, pa treba obratiti pažnju u radu sa njenim objektima.
+
+\emph{Jupyter} je \emph{open-source} projekat koji pruža alate za interaktivan rad u oblastima obrade podataka i mašinskog učenja. Alat koji je korišćen u okviru ovog projekta je \emph{jupyter notebook}. Ovaj alat omogućava pisanje dokumenata koji može da sadrži izvršivi kod, tekst, jednačine i vizualizaciju podataka, pa je kao takav zgodan za analizu podatka i prikazivanje toka obrade i pripreme podataka, treniranja modela itd. U ovom projektu je preko ovog alata prikazan proces analize i pripreme podataka.
+
+Biblioteke \emph{matplotlib} i \emph{seaborn} su biblioteke koje služe za vizualizaciju podataka. Pružaju mogućnost crtanja raznih grafikona, tabela, statistika itd. Ove biblioteke se koriste u okviru alata \emph{jupyter notebook}, da bi omogućile vizualizaciju podataka.
+
+\emph{SciKit learn} je \emph{open-source} projekat implementiran u programskom jeziku \emph{Python} i bibliotekama \emph{numpy}, \emph{scipy} i \emph{matplotlib}. Ovaj projekat pruža efikasne alate za oblast mašinskog učenja. Ova biblioteka pruža funkcionalnosti za pripremu podataka, kao i veliki broj modela koji implementiraju neke od tehnika mašinskog učenja kao što su klasifikacija, regresija i klasterovanje. Ova biblioteka sadrži veliki broj modela koji mogu lako da se podese, treniraju i testiraju nad podacima. Takođe, u ovoj biblioteci su sadržane i metode za redukciju dimenzionalnosti skupa podataka kao i metode za odabir parametara prilikom treniranja modela.
+
+
+\subsection{Analiza i obrada podataka}
+
+Skup podataka predstavlja podatke o aplikacijama koji su sačuvani u okviru jednog \emph{csv} fajla. Svaka aplikacija opisana je sa 13 atributa. Skup podataka sadrži informacije za 10841 aplikacija sa \emph{Google Play} prodavnice. 
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=160mm]{img/dataset.jpg}
+\caption{Izgled skupa podataka.}
+\label{Dataset}
+\end{figure} 
+
+Za svaku aplikaciju su sačuvani sledeći podaci:
+
+\begin{itemize}
+\item \emph{App} - ime aplikacije
+\item \emph{Category} - kategorija aplikacije
+\item \emph{Rating} - rejting aplikacije koji je izračunat na osnovu ocena korisnika
+\item \emph{Reviews} - broj korisnika koji su ocenili aplikaciju
+\item \emph{Size} - veličina aplikacije na disku  
+\item \emph{Installs} - broj instalacija aplikacije 
+\item \emph{Type} - tip aplikacije (besplatna/kupuje se) 
+\item \emph{Price} - cena aplikacije
+\item \emph{Content Rating} - preporuka za uzrast
+\item \emph{Genres} - žanr aplikacije
+\item \emph{Last updated} - poslednji \emph{update} aplikacije 
+\item \emph{Current Ver} - trenutna verzija aplikacije
+\item \emph{Android Ver} - potrebna verzija androida da bi aplikacija radila
+\end{itemize}
+
+Da bi ovi podaci mogli da se koriste za treniranje modela na osnovu koga se generišu preporuke potrebno je pripremiti podatke u odgovarajućem obliku. Model i metode koje se koriste za generisnje preporuke su bazirani na merama sličnosti kao što su Euklidska i kosinusna sličnost. Obzirom da ove mere mogu da se primenjuju na vektorima koji sadrže brojevne vrednosti, potrebno je da se podaci, iz skupa podataka o android aplikacijama, konvertuju u takve vektore. Skup podataka sadrži brojevne i kategoričke vrednosti. Neki od podataka su prikazani kombinacijom brojeva i znakova, koji prikazuju npr. mernu jedinicu. Ovakve podatke je potrebno konvertovati da budu prikazani samo brojevima, npr. u slučaju merne jedinice treba konvertovati sve redove u istu mernu jedinicu. Kategorički podaci sa druge strane mogu da se vektorizuju i budu prikazani preko vektora koji sadrže 0 i 1. Priprema podataka za ovaj sistem je urađena na osnovu analize podataka. Analiza podataka kao i njihova obrada prikazana je u nastavku.
+
+Skup podataka o android aplikacijama sadrži polja koja kao vrednost imaju upisanu vrednost \emph{NaN}. Ova vrednost označava da podatak za određeni atribut nedostaje u opisu aplikacije. Pošto modelu sa kojim radimo ne možemo da prosledimo ovakvu vrednost potrebno je nekako obraditi ove vrednosti. Jedan od načina je da obrišemo redove koji sadrže ove vrednosti ili da ih zamenimo odgovarajućim vrednostima (standardna vrednost, prosečna vrednost, središnja vrednost itd.).
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=40mm]{img/nan.PNG}
+\caption{Atributi skupa podataka i broj \emph{NaN} vrednosti za svaki atribut.}
+\label{nan}
+\end{figure} 
+
+Kao što možemo da vidimo na slici~\ref{nan}, atribut \emph{Rating} ima veći broj vrednosti koje nedostaju tako da je potrebno zameniti ih nekom vrednošću koja odgovara vrednostima za rejting drugih aplikacija. Što se tiče drugih atributa sa vrednostima \emph{NaN}, oni ne predstavljaju veliki procenat u odnosu na sve podatke, tako da njih uklanjamo nakon obrade svih kolona, ako i dalje budu sadržani u skupu podataka. 
+
+Atribut \emph{App} je tipa string i predstavlja ime aplikacije, koje ne daje nikakvu informaciju o sličnosti sa drugim aplikacijama tako da ga za potrebe treniranja modela ne koristimo. Ova kolona iz skupa podataka se na kraju čuva u zasebni fajl kako bi se koristila za pretragu aplikacija i davanje preporuka po imenu. Svaka aplikacije se vezuje za odgovarajući vektor iz obrađenog skupa podataka. Vektor iz obrađenog skupa podataka se koristi za pronalaženje sličnih aplikacija.
+
+\emph{Category} predstavlja kategoriju aplikacije, koja je zapisana u obliku stringa. Ovaj atribut je kategorički, pa kao takav odgovara modelu koji se koristi, pa nema potrebe za promenom. Na slici~\ref{Category} su prikazane kategorije kao i broj aplikacija po svakoj kategoriji.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=140mm]{img/category.png}
+\caption{Kategorije aplikacija.}
+\label{Category}
+\end{figure} 
+
+\emph{Rating} predstavlja prosečnu ocenu koju su korisnici davali aplikaciji. To je brojevna vrednost između 0 i 5, pa kao takva odgovara. Potrebno je utvrditi da su sve vrednosti razlomljeni brojevi između 0 i 5. Analizom ovog atributa utvrđeno je da postoje ocene koje nisu u traženom opsegu (slika~\ref{Rating}). S obzirom da je u pitanju samo jedna aplikacija koja ima ocenu van opsega, tu aplikaciju brišemo iz skupa podataka.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=90mm]{img/rating.png}
+\includegraphics[width=90mm]{img/rating1.png}
+\caption{Opseg atributa rejting pre i posle uklanjanja ne validnih vrednosti.}
+\label{Rating}
+\end{figure} 
+
+Takođe u skupu podataka postoji 1474 aplikacija za koje nedostaje podatak o rejtingu. Pošto te aplikacije čine 10\% skupa podataka, one se ne brišu, već se svim tim aplikacijama dodeljuje vrednost $2.5$. Ova vrednost je određena u odnosu na atribut \emph{Reviews}. Analizom korelacije između ova dva atributa (slika~\ref{Corr}), utvrđeno je da porastom broja ocena raste i sam rejting. Zbog toga što maksimalna i srednja vrednost atributa  \emph{Reviews}, za aplikacije kojima nedostaje ocena, spadaju u opseg vrednosti atributa \emph{Reviews} za aplikacije koje imaju ocene između 2 i 3, aplikacijama koje nemaju vrednost rejtinga daje se rejting 2.5. 
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=90mm]{img/corr.png}
+\caption{Korelacija između rejtinga i broja datih ocena za aplikaciju.}
+\label{Corr}
+\end{figure} 
+
+\emph{Reviews} kao što je već rečeno, predstavlja broj korisnika koji su ocenili neku aplikaciju. Ovaj atribut je predstavljen kao celobrojna vrednost kod svih aplikacija i kao takav odgovara za proces treniranja modela. 
+
+\emph{Size} predstavlja veličinu aplikacije na disku. Ovaj atribut je u skupu podataka upisan kao string vrednost. String je sačinjen od broja koji predstavlja veličinu i slova koje predstavlja mernu jedinicu (K - kilobajt, M - megabajt). Takođe neke aplikacije imaju specijalnu vrednost \emph{''Varies with device''}. Ovaj atribut se za potrebe treniranja modela konvertuje u brojevnu vrednost, tako što se brišu slova koja označavaju mernu jedinicu, kilobajti se konvertuju u megabajte, a specijalna vrednost se menja sa -1.
+
+Broj instalacija (\emph{Installs}) je predstavljen brojem, koji predstavlja donju granicu broja instalacija, i znakom +, koji označava da je broj instalacija veći od donje granice. Za potrebe treniranja modela uklanjamo + i dobijamo brojevnu vrednost. Tip aplikacije (\emph{Type}) je označen sa dva stringa \emph{''Paid''} i \emph{''Free''}, pa možemo da ga tretiramo kao nominalnu vrednost. Atribut \emph{Price} koji predstavlja cenu aplikacije je brojevna vrednost i nema nevalidnih podataka ili aplikacija za koje ova vrednost nedostaje, tako da je kao takva odgovarajuća za treniranje modela.
+
+Atribut \emph{Content Rating} je tipa string, koji ima nekoliko mogućih vrednosti (slika~\ref{Corr}). Ovaj atribut možemo da tretiramo kao nominalnu vrednost. S obzirom da je broj aplikacija koje za ovaj atribut imaju vrednosti \emph{''Adults only 18+''} i \emph{''Unrated''}, možemo da kažemo da su ove vrednosti slabo predstavljene u ovom skupu podataka. 
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=40mm]{img/contentrating1.PNG}
+\caption{Vrednosti atributa \emph{Content Rating} i broj aplikacija za svaku od tih vrednosti.}
+\label{ContentRating}
+\end{figure} 
+
+Da bi smanjili veličinu vektora koji se koristi kao ulaz za treniranje modela, ove dve vrednosti možemo da promenimo u vrednost \emph{''everyone''}, koja predstavlja opštu preporuku. Na ovaj način smo smanjili broj vrednosti kojima se predstavlja ovaj atribut.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=80mm]{img/contentrating2.png}
+\caption{Raspodela nakon obrade atributa \emph{Content Rating}.}
+\label{ContentRating1}
+\end{figure} 
+
+\newpage
+\emph{Genres} predstavlja žanr aplikacije upisan kao string u skupu podataka. Iz skupa podataka možemo da vidimo da je žanr aplikacije isti kao kategorija sa dodatkom nekih drugi odrednica, koje bolje opisuju žanr aplikacije. Kao takav nam daje iste informacije kao atribut \emph{Category}, pa ga odbacujemo kao nepotrebnu informaciju za treniranje modela. 
+
+Atributi \emph{Last updated} i \emph{Current Ver} ne daju nikakve informacije o sličnosti između aplikacija, pa ih kao takve ne koristimo za treniranje modela. Sa druge strane atribut \emph{Android Ver} daje korisnu informaciju o aplikaciji. Vrednost ovog atributa u skupu podataka može da bude verzija androida, \emph{''Others''} i \emph{''Varies with device''} (slika~\ref{AndroidVer}).
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=100mm]{img/androidVer1.png}
+\caption{Android verzije i broj aplikacija za svaku verziju.}
+\label{AndroidVer}
+\end{figure} 
+
+Možemo da vidimo da su neke od verzija malo zastupljene među aplikacijama. Da bi smanjili ulazni vektor za treniranje modela u slučaju ovog atributa sve vrednosti verzije androida koje nemaju više od 100 aplikacija u skupu podataka menjamo u vrednost \emph{''Others''}, čime dobijamo bolje predstavljanje svake vrednosti ovog atributa i smanjujemo veličinu ulaznog vektora za treniranje modela (slika~\ref{AndroidVer1}). 
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=100mm]{img/androidVer2.png}
+\caption{Android verzije i broj aplikacija za svaku verziju nakon pripajanja malo zastupljenih vrednosti drugim vrednostima.}
+\label{AndroidVer1}
+\end{figure} 
+
+Nakon analize, obrade i odbacivanja atributa dobijamo skup podataka sa 9 atributa i 10837 redova (slika~\ref{Dataset1}). Imamo 5 atributa koji su prikazani brojevima (\emph{Rating}, \emph{Reviews}, \emph{Size}, \emph{Installs} i \emph{Price}) i 4 kategorička atributa prikazana stringovima (\emph{Category}, \emph{Type}, \emph{Content Rating}, \emph{Android Ver}). 
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=160mm]{img/dataset1.png}
+\caption{Izgled skupa podataka nakon obrade.}
+\label{Dataset1}
+\end{figure} 
+
+Da bi treniranje modela bilo moguće potrebno je da svi atributi budu predstavljeni brojevnim vrednostima. Za pretvaranje kategoričke vrednosti u numeričku koristimo metodu kodiranja u vektor sa vrednostima 0 i 1 (eng. \emph{one hot encoding}). Svaka vrednost se pretvara u vektor sa vrednostima 0 i 1. Vektor je dužine $n$, gde $n$ predstavlja broj različitih vrednosti koja kategorička vrednost može da ima. Vektor za neku vrednost ima sve 0 i jednu 1 na odgovarajućoj poziciji. Na ovaj način se jedna kolona u skupu podataka menja sa $n$ kolona koje imaju vrednosti 0 ili 1. Primenom ove metode na sve kategoričke atribute dobijamo skup podataka sa 60 kolona, koje imaju brojevne vrednosti. 
+
+Da bi treniranje modela bilo stabilno potrebno je da svi atributi budu u istom opsegu. S obzirom da različiti atributi predstavljaju različite osobine aplikacije, opseg vrednosti im se razlikuje. Vrednosti različitog opsega mogu loše da utiču na treniranje modela, jer će atributi sa većim vrednostima više da utiču na proces treniranja, pa je potrebno da se svi atributi svedu na isti opseg. Da bi se ovo postiglo koristi se metoda \emph{MinMax} skaliranja. Ova metoda mapira opseg između minimalne vrednosti maksimalne vrednosti atributa u opseg između 0 i 1.
+
+Na kraju kada su svi podaci numerički i u opsegu $[0, 1]$, postoji mogućnost da postoje dve aplikacije koje se preslikavaju u isti vektor. Ovakve aplikacije su identične u odnosu na meru sličnosti, pa će mera sličnosti za takve dve aplikacije biti maksimalna, što će rezultovati da se jedna aplikacija izlazi kao preporuka drugoj. Metode koje koriste ovakve mere ne mogu da razlikuju dve aplikacije koje se preslikavaju u isti vektor, ali se predpostavlja da te aplikacije i jesu slične jedna drugoj ako se preslikavaju u isti vektor. 
+
+Ovako obrađeni skup podataka pamtimo u \emph{csv} fajlu da ga kasnije koristili za sistem preporuke. 
+
+
+\subsection{Implementacija sistema za preporuku}
+
+Sistem za preporuku android aplikacije, napravljen je kao aplikacija koja na osnovu imena aplikacije vraća listu od $n$ aplikacija koje su sortirane opadajuće po sličnosti, gde je $n$ broj koji korisnik unosi na početku. Takođe su kao rezultat pretrage date i informacije o aplikacijama koje su izbačene kao rezultat pretrage. 
+
+Aplikacije koje su rezultat preporuke koje aplikacija daje se dobijaju korišćenjem modela \emph{k-Nearest-Neighbor}. Ovaj model je istreniran, metodom nenadgledanog učenja, na sređenom skupu podataka, koji je dobijen kao rezultat faze analize i pripreme podataka. Za meru sličnosti \emph{k-Nearest-Neighbor} koristi euklidsku distancu.  
+
+Inicijalizacija i treniranje modela:
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=80mm]{img/model.PNG}
+\label{ModelCode}
+\end{figure}
+
+Ulazni vektor se dobija učitavanjem odgovarajućeg vektora, za aplikaciju čije je ime korisnik uneo. Model, na osnovu ulaznog vektora, za definisani broj $k$, vraća $k$ najsličniji vektora. Rezultat se sortira na osnovu sličnosti sa ulaznim vektorom. Za meru sličnosti koristi se kosinusna sličnost. Za rezultujuće vektore se nalaze odgovarajuća imena u skupu imena i prikazuju se korisniku na izlazu. 
+
+\newpage
+Metoda za dobijanje preporuka aplikacija:
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=120mm]{img/metoda.PNG}
+\label{MetodaCode}
+\end{figure}
+
+
+
+\section{Rezultat}
+
+Sistem za preporuku android aplikacija sa \emph{Google Play} prodavnice, implementiran je kao \emph{python} skripta. Korisnik nakon pokretanja aplikacije unosi broj željenih preporuka i ime aplikacije za koju traži preporuku. Aplikacija zatim vraća sortiranu listu preporuka za android aplikaciju. 
+
+Korisnik unosi željeni broj preporuka i ime aplikacije, na osnovu koje sistem straži slične aplikacije:
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=180mm]{img/primer1.PNG}
+\label{Input1}
+\end{figure}
+
+Aplikacija kao rezultat vraća:
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=180mm]{img/rez1.PNG}
+\label{Input1}
+\end{figure}
+
+Vidimo da aplikacija vraća listu od pet aplikacija koje su najsličnije unetoj aplikaciji. Takođe možemo da vidimo meru sličnosti pored imena svake aplikacije. Možemo da vidimo da su prve tri aplikacije veoma slične sa aplikacijom koju je korisnik predložio. Iz podataka možemo da vidimo da te aplikacije pripadaju istoj kategoriji i da imaju sličan rejting. Poslednje dve aplikacije nisu baš slične kao aplikacija koju je korisnik predložio, ali se to i ogleda u tome što je vrednost sličnosti manja u odnosu na prve tri.
+
+\newpage
+U sledećem primeru aplikacija vraća:
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=180mm]{img/primer2.PNG}
+\label{Input1}
+\end{figure}
+
+U ovom primeru možemo da vidimo da je svih pet predloženih aplikacija veoma slično sa predloženom aplikacijom, jer svih pet aplikacija ima visok koeficijent sličnosti sa predloženom aplikacijom. Možemo da primetimo da sve predložene aplikacije pripadaju istoj kategoriji i da imaju sličan rejting, a pri tome su sve besplatne.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=180mm]{img/primer3.PNG}
+\label{Input1}
+\end{figure}
+
+U ovom primeru vidimo da svi rezultati imaju visoku meru sličnosti, i da prva tri rezultata kao i zadata aplikacija služe za crtanje. Dok ostale aplikacije imaju visok skor, ali nisu skroz slične, međutim pripadaju istoj kategoriji i imaju druge slične karakteristike. 
+
+\newpage
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=180mm]{img/primer4.PNG}
+\label{Input1}
+\end{figure}
+
+Ovde vidimo da je za zadatu aplikaciju koja služi za plaćanje parkinga, sistem izbacio preporuke za aplikacije koje su vezane za automobile na neki način. Pošto u skupu podataka verovatno ne postoje druge aplikacije za plaćanje parkinga, sistem za sugestije je izbacio aplikacije koje su u širem kontekstu povezane sa zadatom aplikacijom. 
+
+Ako korisnik nije zadovoljan rezultatima koje sistem za preporuku vraća možemo da pokušamo da povećamo broj preporuka koje sistem vraća kako bi korisnik došao do zanimljive aplikacije. 
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=120mm]{img/primer4-ext.PNG}
+\label{Input1}
+\end{figure}
+
+\newpage
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=180mm]{img/primer5.PNG}
+\label{Input1}
+\end{figure}
+
+Ovaj primer prikazuje slučaj u kome samo jedna aplikacija ima visoku meru sličnosti sa zadatom aplikacijom. Možemo da vidimo da ta aplikacija najviše odgovara tipu aplikacije koja je zadata i služi za čitanje stripova.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=120mm]{img/primer7.PNG}
+\label{Input1}
+\end{figure}
+
+Na prethodnoj slici imamo rezultat sugestija za igru 8 Ball Pool. Ova igra simulira igru bilijara. Ono što možemo da primetimo da su sve sugestije iz kategorije igara, međutim igrice koje je sistem izbacio kao preporuku ne pripadaju istom žanru kao ponuđena igrica, a imaju visoku meru sličnosti sa zadatom aplikacijom. Ovo je rezultat nedovoljnog broja informacija o aplikacijama, što je rezultat obrade skupa podataka. Naime informacije o žanrovima aplikacija su odbačeni jer u dosta slučajeva imaju istu vrednost kao i kategorija. Drugi razlog izbacivanja ove kolone se ogleda u tome što ona ima mnogo različitih vrednosti pa bi prilikom konverzije u vektor 0 i 1 taj vektor imao previše podataka, što je limitacija metoda i pristupa koji se koriste u ovom radu.
+
+Prikazana aplikacija predstavlja dokaz koncepta sistema preporuke baziranog na sadržaju. Sistem preporuke android aplikacija sa \emph{Google Play} prodavnice, treba da ima pristup podacima korisnika ove veb aplikacije, na osnovu kojih bi kreirao preporuke za tog korisnika. Sam sistem bi na osnovu aplikacija koje je korisnik koristio ili koristi, kreirao preporuke kao prikazana aplikacija. Za preporuku bi koristio isti model, a korisniku bi vraćao samo aplikacije koje imaju visok skor sličnosti.
+
+Ovaj projekat predstavlja primer sistema preporuke, kao i metode za pronalaženje preporuka. Takođe kroz ovaj projekat je prikazano kako se podaci koriste i koji su potrebni koraci da bi se dobila funkcionalnost jednog sistema za preporuke.
+
+
+
+\section{Zaključak}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Da bi se korisnicima olakšalo pretraživanje android aplikacija i na taj način povećao broj instalacija android aplikacija, \emph{Google} dosta ulaže u sistem za preporuke android aplikacija sa \emph{Google Play} prodavnice. Takođe sistemi za preporuku su neizostavni deo raznih servisa za strimovanje audio i video fajlova, veb prodavnica i raznih drugih servisa. Sistemi za preporuku su ključni za razvoj \emph{ecommerce}-a. 
+
+Ovaj projekat se bavi implementacijom jednog takvog sistema. U okviru ovog projekta je implementiran sistem za preporuku android aplikacija. Bitno je napomenuti da u okviru projekta nije implementiran kompletan sistem za preporuku, jer bi to zahtevalo povezivanje sa \emph{Google Play} servisom. U okviru ovog projekta su prikazane tehnike i metode koje se koriste u realizaciji jednog ovakvog sistema. Takođe je prikazan postupak analize i pripreme podataka. Ova faza je veoma bitna, jer od pripreme podataka zavisi tačnost tehnika i metoda koje se kasnije koriste za kreiranje preporuke. Napravljena je aplikacija koja može da vrati preporuku na osnovu zadate aplikacije.
+
+Sa obzirom da skup podataka sadrži samo deo aplikacija koje mogu da se pronađu u okviru \emph{Google Play} prodavnice, tehnike i metode koje su korišćene u ovom projektu ne bi mogle da se skaliraju u pravom sistemu. Međutim, osnovne ideje, metode kao i postupak pripreme podataka mogu da se primene pri pravljenju bilo kog sistema za preporuku. Ovaj projekat je primer koji pokazuje osnovne funkcije jednog sistema za preporuku, ali i način na koji on može da se realizuje. 
+
+
+
+\newpage
+\addcontentsline{toc}{section}{Literatura}
+\begin{thebibliography}{10}
+
+\bibitem{RecommendSystem}
+Francesco Ricci and Lior Rokach and Bracha Shapira,
+\href{http://www.inf.unibz.it/~ricci/papers/intro-rec-sys-handbook.pdf}{''Introduction to Recommender Systems Handbook''},
+Recommender Systems Handbook, Springer, pp. 1-35,
+2011.
+
+\bibitem{NumPy}
+NumPy API documentation, 
+\href{https://numpy.org/doc/stable/}{https://numpy.org/doc/stable/},
+2021.
+
+\bibitem{Pandas}
+Pandas API documentation, 
+\href{https://pandas.pydata.org/docs/}{https://pandas.pydata.org/docs/},
+2021.
+
+\bibitem{Jupyter}
+Jupyter documentation, 
+\href{https://jupyter.org/documentation}{https://jupyter.org/documentation},
+2021.
+
+\bibitem{Matplotlib}
+Matplotlib API documentation, 
+\href{https://matplotlib.org/stable/contents.html}{https://matplotlib.org/stable/contents.html},
+2021.
+
+\bibitem{Seaborn}
+Seaborn API documentation, 
+\href{https://seaborn.pydata.org/}{https://seaborn.pydata.org/},
+2021.
+
+\bibitem{Scikit}
+Scikit Learn API documentation, 
+\href{https://scikit-learn.org/stable/}{https://scikit-learn.org/stable/},
+2021.
+
+\bibitem{RecommendSystemPaper}
+Ahlam Fuad, Sahar Bayoumi, Hessah Al-Yahya
+\href{https://thesai.org/Downloads/Volume11No9/Paper_6-A_Recommender_System_for_Mobile_Applications.pdf}{''A Recommender System for Mobile Applications of Google Play Store''},
+(IJACSA) International Journal of Advanced Computer Science and Applications,
+Vol. 11, No. 9, 
+2020.
+
+
+
+\end{thebibliography}
+
+\end{document}
